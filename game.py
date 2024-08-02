@@ -1,123 +1,90 @@
 import random
 
-class Player:
-    def __init__(self, name, role):
-        self.name = name
-        self.role = role
-        self.is_alive = True
+# Oyuncular ve roller listelerini oluştur
+oyuncular = []
+roller = []
 
-    def __str__(self):
-        return f"{self.name}"
+# Oyunun başına kaç kişi oynayacak?
+oyuncu_sayisi = int(input("Kaç kişi oynayacak? "))
 
-def get_player_count():
-    while True:
-        try:
-            count = int(input("Kaç oyuncu var? "))
-            if count < 4:
-                print("Oyuncu sayısı en az 4 olmalıdır.")
-            else:
-                return count
-        except ValueError:
-            print("Lütfen geçerli bir sayı girin.")
+# Oyuncuların isimlerini al
+for i in range(oyuncu_sayisi):
+    isim = input(f"{i+1}. oyuncunun ismi: ")
+    oyuncular.append(isim)
 
-def get_role_counts(player_count):
-    roles = ['Köylü', 'Doktor', 'Gözcü', 'Vampir']
-    role_counts = {}
-    remaining = player_count
+# Rol dağılımını al
+roller_dict = {"köylü": 0, "doktor": 0, "gözcü": 0, "katil": 0}
+for rol in roller_dict.keys():
+    sayi = int(input(f"Kaç tane {rol} olacak? "))
+    roller_dict[rol] = sayi
 
-    for role in roles:
-        while True:
-            try:
-                count = int(input(f"Kaç tane {role} olacak? (Kalan oyuncu: {remaining}) "))
-                if count < 0 or count > remaining:
-                    print("Geçersiz sayı. Kalan oyuncu sayısına uygun bir sayı girin.")
-                else:
-                    role_counts[role] = count
-                    remaining -= count
+# Roller listesini oluştur
+roller = (
+    ["köylü"] * roller_dict["köylü"]
+    + ["doktor"] * roller_dict["doktor"]
+    + ["gözcü"] * roller_dict["gözcü"]
+    + ["katil"] * roller_dict["katil"]
+)
+random.shuffle(roller)  # Roller rastgele dağıt
+
+# Oyunculara rollerini ata
+oyuncu_roller = list(zip(oyuncular, roller))
+
+# Oyun döngüsü
+while True:
+    oylama_listesi = []
+    oldurulen = None
+    iyilestirilen = None
+    katil = None
+
+    print("\nTur başlıyor...")
+
+    # Her oyuncunun sırası
+    for i, (oyuncu, rol) in enumerate(oyuncu_roller):
+        print(f"\n{oyuncu} ({rol}) sırada...")
+
+        if rol == "köylü":
+            print(f"{oyuncu} bir şey yapmıyor.")
+        elif rol == "katil":
+            hedef = input(f"{oyuncu}, kimi öldürmek istiyorsun? ")
+            katil = oyuncu
+            oldurulen = hedef
+        elif rol == "doktor":
+            hedef = input(f"{oyuncu}, kimi iyileştirmek istiyorsun? ")
+            iyilestirilen = hedef
+        elif rol == "gözcü":
+            hedef = input(f"{oyuncu}, kimin rolünü görmek istiyorsun? ")
+            for oyuncu_ad, oyuncu_rol in oyuncu_roller:
+                if oyuncu_ad == hedef:
+                    print(f"{hedef}'in rolü: {oyuncu_rol}")
                     break
-            except ValueError:
-                print("Lütfen geçerli bir sayı girin.")
-    
-    if remaining > 0:
-        role_counts['Köylü'] += remaining
 
-    return role_counts
+    # Tur sonunda değerlendirme
+    if oldurulen and oldurulen != iyilestirilen:
+        print(f"{oldurulen} öldürüldü.")
+        oyuncu_roller = [p for p in oyuncu_roller if p[0] != oldurulen]
+    else:
+        print("Kimse ölmedi.")
 
-def assign_roles(player_count, role_counts):
-    players = []
-    names = [input(f"{i + 1}. oyuncunun adını girin: ") for i in range(player_count)]
-    roles = []
+    # Oylama
+    print("\nOylama zamanı...")
+    for oyuncu in oyuncular:
+        oy = input(f"{oyuncu}, kime oy veriyorsun? ")
+        oylama_listesi.append(oy)
 
-    for role, count in role_counts.items():
-        roles.extend([role] * count)
+    # En çok oy alanı bul
+    oy_sayilari = {oyuncu: oylama_listesi.count(oyuncu) for oyuncu in oyuncular}
+    asilan = max(oy_sayilari, key=oy_sayilari.get)
+    print(f"{asilan} asıldı.")
+    oyuncu_roller = [p for p in oyuncu_roller if p[0] != asilan]
 
-    random.shuffle(roles)
+    # Oyun bitim koşulları
+    katil_sayisi = sum(1 for p in oyuncu_roller if p[1] == "katil")
+    diger_roller = len(oyuncu_roller) - katil_sayisi
 
-    for i in range(player_count):
-        players.append(Player(names[i], roles[i]))
-
-    return players
-
-def clear_screen():
-    print("\n" * 100)
-
-def main():
-    while True:
-        player_count = get_player_count()
-        role_counts = get_role_counts(player_count)
-        players = assign_roles(player_count, role_counts)
-
-        print("\nOyuncular belirlendi. Oyun başlıyor...")
-
-        game_over = False
-        while not game_over:
-            vampire_target = None
-            doctor_target = None
-            seer_target = None
-
-            for player in players:
-                if not player.is_alive:
-                    continue
-                
-                clear_screen()
-                print(f"\n{player.name}'nin sırası.")
-                if player.role == 'Vampir':
-                    target_name = input("Öldürmek istediğiniz oyuncunun adını girin: ")
-                    vampire_target = target_name
-                elif player.role == 'Doktor':
-                    target_name = input("İyileştirmek istediğiniz oyuncunun adını girin: ")
-                    doctor_target = target_name
-                elif player.role == 'Gözcü':
-                    target_name = input("Rolüne bakmak istediğiniz oyuncunun adını girin: ")
-                    seer_target = target_name
-
-            clear_screen()
-
-            if vampire_target == doctor_target:
-                print(f"\nDoktor, {vampire_target}'i iyileştirdi. Bu turda kimse ölmedi.")
-            else:
-                for player in players:
-                    if player.name == vampire_target:
-                        player.is_alive = False
-                        print(f"\n{vampire_target} öldü.")
-
-            if seer_target:
-                for player in players:
-                    if player.name == seer_target:
-                        print(f"\n{seer_target} rolü: {player.role}")
-
-            alive_vampires = [p for p in players if p.role == 'Vampir' and p.is_alive]
-            alive_villagers = [p for p in players if p.role != 'Vampir' and p.is_alive]
-
-            if not alive_vampires:
-                print("Köylüler kazandı!")
-                game_over = True
-            elif len(alive_vampires) >= len(alive_villagers):
-                print("Vampirler kazandı!")
-                game_over = True
-
-        if input("Yeni oyun oynamak istiyor musunuz? (e/h) ").lower() != 'e':
-            break
-
-if __name__ == "__main__":
-    main()
+    if katil_sayisi >= diger_roller:
+        print("Katiller kazandı!")
+        break
+    elif katil_sayisi == 0:
+        print("Köylüler kazandı!")
+        break
