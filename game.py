@@ -45,6 +45,7 @@ while True:
 
         if rol == "köylü":
             print(f"{oyuncu} bir şey yapmıyor.")
+            input("Devam etmek için Enter'a basın...")
         elif rol == "katil":
             hedef = input(f"{oyuncu}, kimi öldürmek istiyorsun? ")
             katil = oyuncu
@@ -58,6 +59,9 @@ while True:
                 if oyuncu_ad == hedef:
                     print(f"{hedef}'in rolü: {oyuncu_rol}")
                     break
+
+        # Her oyuncu hareket ettikten sonra 10-20 satır boşluk ekle
+        print("\n" * 10)
 
     # Tur sonunda değerlendirme
     if oldurulen and oldurulen != iyilestirilen:
