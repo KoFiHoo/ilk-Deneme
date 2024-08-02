@@ -7,7 +7,7 @@ class Player:
         self.is_alive = True
 
     def __str__(self):
-        return f"{self.name} ({self.role})"
+        return f"{self.name}"
 
 def get_player_count():
     while True:
@@ -63,10 +63,8 @@ def main():
     role_counts = get_role_counts(player_count)
     players = assign_roles(player_count, role_counts)
 
-    print("\nOyuncu Rolleri:")
-    for player in players:
-        print(player)
-    
+    print("\nOyuncular belirlendi. Oyun başlıyor...")
+
     game_over = False
     while not game_over:
         vampire_target = None
