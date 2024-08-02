@@ -58,56 +58,66 @@ def assign_roles(player_count, role_counts):
 
     return players
 
+def clear_screen():
+    print("\n" * 100)
+
 def main():
-    player_count = get_player_count()
-    role_counts = get_role_counts(player_count)
-    players = assign_roles(player_count, role_counts)
+    while True:
+        player_count = get_player_count()
+        role_counts = get_role_counts(player_count)
+        players = assign_roles(player_count, role_counts)
 
-    print("\nOyuncular belirlendi. Oyun başlıyor...")
+        print("\nOyuncular belirlendi. Oyun başlıyor...")
 
-    game_over = False
-    while not game_over:
-        vampire_target = None
-        doctor_target = None
-        seer_target = None
+        game_over = False
+        while not game_over:
+            vampire_target = None
+            doctor_target = None
+            seer_target = None
 
-        for player in players:
-            if not player.is_alive:
-                continue
-            
-            print(f"\n{player.name}'nin sırası ({player.role})")
-            if player.role == 'Vampir':
-                target_name = input("Öldürmek istediğiniz oyuncunun adını girin: ")
-                vampire_target = target_name
-            elif player.role == 'Doktor':
-                target_name = input("İyileştirmek istediğiniz oyuncunun adını girin: ")
-                doctor_target = target_name
-            elif player.role == 'Gözcü':
-                target_name = input("Rolüne bakmak istediğiniz oyuncunun adını girin: ")
-                seer_target = target_name
-
-        if vampire_target == doctor_target:
-            print(f"\nDoktor, {vampire_target}'i iyileştirdi. Bu turda kimse ölmedi.")
-        else:
             for player in players:
-                if player.name == vampire_target:
-                    player.is_alive = False
-                    print(f"\n{vampire_target} öldü.")
+                if not player.is_alive:
+                    continue
+                
+                clear_screen()
+                print(f"\n{player.name}'nin sırası.")
+                if player.role == 'Vampir':
+                    target_name = input("Öldürmek istediğiniz oyuncunun adını girin: ")
+                    vampire_target = target_name
+                elif player.role == 'Doktor':
+                    target_name = input("İyileştirmek istediğiniz oyuncunun adını girin: ")
+                    doctor_target = target_name
+                elif player.role == 'Gözcü':
+                    target_name = input("Rolüne bakmak istediğiniz oyuncunun adını girin: ")
+                    seer_target = target_name
 
-        if seer_target:
-            for player in players:
-                if player.name == seer_target:
-                    print(f"\n{seer_target} rolü: {player.role}")
+            clear_screen()
 
-        alive_vampires = [p for p in players if p.role == 'Vampir' and p.is_alive]
-        alive_villagers = [p for p in players if p.role != 'Vampir' and p.is_alive]
+            if vampire_target == doctor_target:
+                print(f"\nDoktor, {vampire_target}'i iyileştirdi. Bu turda kimse ölmedi.")
+            else:
+                for player in players:
+                    if player.name == vampire_target:
+                        player.is_alive = False
+                        print(f"\n{vampire_target} öldü.")
 
-        if not alive_vampires:
-            print("Köylüler kazandı!")
-            game_over = True
-        elif len(alive_vampires) >= len(alive_villagers):
-            print("Vampirler kazandı!")
-            game_over = True
+            if seer_target:
+                for player in players:
+                    if player.name == seer_target:
+                        print(f"\n{seer_target} rolü: {player.role}")
+
+            alive_vampires = [p for p in players if p.role == 'Vampir' and p.is_alive]
+            alive_villagers = [p for p in players if p.role != 'Vampir' and p.is_alive]
+
+            if not alive_vampires:
+                print("Köylüler kazandı!")
+                game_over = True
+            elif len(alive_vampires) >= len(alive_villagers):
+                print("Vampirler kazandı!")
+                game_over = True
+
+        if input("Yeni oyun oynamak istiyor musunuz? (e/h) ").lower() != 'e':
+            break
 
 if __name__ == "__main__":
     main()
